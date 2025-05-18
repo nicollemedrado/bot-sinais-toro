@@ -5,4 +5,4 @@ ID_CHAT_TELEGRAM = "5845175811"
 
 BANCA_INICIAL = 200
 RISCO_POR_OPERACAO = 0.02
-ATIVO_ANALISADO = "WINM25"
+ATIVO_ANALISADO = "WINM25"  # ainda não usamos aqui, mas serve para expansão
