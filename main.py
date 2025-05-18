@@ -4,13 +4,13 @@ import time
 from telegram_bot import enviar_mensagem
 from settings import BANCA_INICIAL, RISCO_POR_OPERACAO
 
-# Configurações do bot
-ATIVOS = ["WIN=F", "WD1=F"]  # Mini índice e mini dólar do Yahoo Finance
+# Ativos a serem analisados
+ATIVOS = ["WIN=F", "WD1=F"]
 INTERVALO = "5m"
 PERIOD = "1d"
-STOP_PONTOS = 200  # Ajustável
-VALOR_PONTO = 0.20  # R$ por ponto por contrato
-INTERVALO_ANALISE = 300  # a cada 5 minutos
+STOP_PONTOS = 200
+VALOR_PONTO = 0.20
+INTERVALO_ANALISE = 300  # segundos
 
 def calcular_contratos():
     risco_total = BANCA_INICIAL * RISCO_POR_OPERACAO
@@ -23,7 +23,8 @@ def obter_dados(ativo):
     df.dropna(inplace=True)
     df['MM9'] = df['Close'].rolling(window=9).mean()
     df['MM21'] = df['Close'].rolling(window=21).mean()
-    df['RSI'] = 100 - (100 / (1 + (df['Close'].diff().clip(lower=0).rolling(14).mean() / df['Close'].diff().clip(upper=0).abs().rolling(14).mean())))
+    df['RSI'] = 100 - (100 / (1 + (df['Close'].diff().clip(lower=0).rolling(14).mean() /
+                                   df['Close'].diff().clip(upper=0).abs().rolling(14).mean())))
     return df
 
 def verificar_sinal(df):
@@ -53,13 +54,15 @@ def main():
                         preco = round(df['Close'].iloc[-1], 2)
                         contratos = calcular_contratos()
                         mensagem = f"""
-📊 NOVO SINAL DETECTADO
+🚨 NOVO SINAL DETECTADO
 
-Ativo: {ativo}
-Direção: {direcao}
-Preço atual: {preco}
-Contratos sugeridos: {contratos}
-Stop: {STOP_PONTOS} pontos
+🪙 Ativo: {ativo}
+📈 Direção: {'🔼 COMPRA' if direcao == 'COMPRA' else '🔽 VENDA'}
+🎯 Preço atual: R$ {preco}
+📊 Contratos recomendados: {contratos}
+⛔ Stop técnico: {STOP_PONTOS} pontos
+
+⏱️ Análise automatizada - {datetime.datetime.now().strftime('%d/%m %H:%M')}
 """
                         enviar_mensagem(mensagem)
                 except Exception as e:
